@@ -26,9 +26,71 @@ app.use(cors()) //add CORS support to each following route handler
 const client = new Client(dbConfig);
 client.connect();
 
-app.get("/", async (req, res) => {
-  const dbres = await client.query('select * from categories');
-  res.json(dbres.rows);
+// GET BOOKS
+app.get("/books", async (req, res) => {
+
+  try {
+    const dbres = await client.query('select * from books');
+    res.json(dbres.rows);
+    
+  } catch (error) {
+    console.error(error.message);
+    res.status(404).json({
+      status: "fail",
+      error: error.message
+    })
+  }
+  
+});
+
+// POST A BOOK
+app.post("/books", async (req, res) => {
+  const {name, author, genre} = req.body;
+
+  try {
+    await client.query('INSERT INTO books (name, author, genre) VALUES ($1, $2, $3)', [name, author, genre]);
+    res.status(201).json({
+      status: "success",})
+    
+  } catch (error) {
+    console.error(error.message);
+    res.status(400).json({
+      status: "fail",
+      error: error.message
+    }); 
+  }
+  
+});
+
+// GET ALL FAVOURITES
+app.get("/favourites", async (req, res) =>{
+  try {
+    const dbres = await client.query('SELECT * FROM favourites');
+    res.json(dbres.rows);
+    
+  } catch (error) {
+    console.error(error.message)
+    res.status(404).json({
+      status: "fail",
+      error: error.message
+    }); 
+  }
+});
+
+// GET FAVOURITES OF ONE PERSON
+app.get("/favourites/:id", async (req, res) =>{
+  const id = parseInt(req.params.id);
+  try {
+    const dbres = await client.query('SELECT * FROM favourites WHERE userID=$1', [id]);
+    res.json(dbres.rows);
+    
+  } catch (error) {
+    console.error(error.message)
+    res.status(404).json({
+      status: "fail",
+      error: error.message
+    }); 
+  }
 });
 
 
