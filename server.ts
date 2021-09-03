@@ -93,6 +93,20 @@ app.get("/favourites/:id", async (req, res) =>{
   }
 });
 
+app.delete("/books/:id", async (req,res) => {
+  const id = parseInt(req.params.id);
+  try {
+    await client.query('DELETE FROM books WHERE id=$1', [id]);
+    res.status(201).json({
+      status: "success",})
+    
+  } catch (error) {
+    console.error(error.message)
+    
+  };
+
+});
+
 
 //Start the server on the given port
 const port = process.env.PORT;
