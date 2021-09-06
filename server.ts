@@ -80,6 +80,7 @@ app.get("/favourites", async (req, res) =>{
 // GET FAVOURITES OF ONE PERSON
 app.get("/favourites/:id", async (req, res) =>{
   const id = parseInt(req.params.id);
+  
   try {
     const dbres = await client.query('SELECT * FROM favourites WHERE userID=$1', [id]);
     res.json(dbres.rows);
@@ -92,6 +93,24 @@ app.get("/favourites/:id", async (req, res) =>{
     }); 
   }
 });
+
+
+// GET FAVOURITES OF ONE PERSON
+app.post("/favourites", async (req, res) =>{
+  const {userid, bookid} = req.body;
+
+  try {
+    await client.query('INSERT INTO favourites (userid, bookid) VALUES ($1, $2)', [userid, bookid]);
+    
+  } catch (error) {
+    console.error(error.message)
+    res.status(404).json({
+      status: "fail",
+      error: error.message
+    }); 
+  }
+});
+
 
 app.get("/favouriteBooks/:id", async (req, res) => {
   const id = parseInt(req.params.id);
