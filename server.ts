@@ -93,6 +93,37 @@ app.get("/favourites/:id", async (req, res) =>{
   }
 });
 
+app.get("/favouriteBooks/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    const dbres = await client.query('SELECT b.name, b.author, b.genre FROM books AS B INNER JOIN favourites AS f ON b.id=f.bookid WHERE f.userid=$1', [id])
+    res.json(dbres.rows);
+  } catch (error) {
+    console.error(error.message)
+    res.status(404).json({
+      status: "fail",
+      error: error.message
+    }); 
+    
+  }
+});
+
+app.get("/users", async (req,res) => {
+  try {
+    const dbres = await client.query('SELECT * from users');
+    res.json(dbres.rows);
+    
+  } catch (error) {
+    console.error(error.message)
+    res.status(404).json({
+      status: "fail",
+      error: error.message
+    }); 
+    
+  }
+})
+
+
 app.delete("/books/:id", async (req,res) => {
   const id = parseInt(req.params.id);
   try {
@@ -106,6 +137,7 @@ app.delete("/books/:id", async (req,res) => {
   };
 
 });
+
 
 
 //Start the server on the given port
