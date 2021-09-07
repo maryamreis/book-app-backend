@@ -95,12 +95,38 @@ app.get("/favourites/:id", async (req, res) =>{
 });
 
 
-// GET FAVOURITES OF ONE PERSON
+// POST TO FAVOURITES OF ONE PERSON
 app.post("/favourites", async (req, res) =>{
   const {userid, bookid} = req.body;
 
   try {
-    await client.query('INSERT INTO favourites (userid, bookid) VALUES ($1, $2)', [userid, bookid]);
+
+    //await client.query('INSERT INTO favourites (userid, bookid) VALUES ($1, $2) WHERE NOT EXISTS (SELECT userid, bookid FROM favourites WHERE userid=$1 AND bookid=$2)', [userid, bookid]);
+    //await client.query('IF NOT EXISTS(SELECT userid, bookid FROM favourites WHERE userid=$1 AND bookid=$2) BEGIN INSERT INTO favourites (userid, bookid) VALUES ($1, $2) END', [userid, bookid]);
+    const selectResponce = await client.query('SELECT userid, bookid FROM favourites WHERE userid=$1 AND bookid=$2', [userid, bookid])
+    console.log("responce")
+    res.json(selectResponce.rows);
+    console.log("after")
+    
+    if (selectResponce.rows === []){
+      await client.query('INSERT INTO favourites (userid, bookid) VALUES ($1, $2)', [userid, bookid]);
+    }
+
+  } catch (error) {
+    console.error(error.message)
+    res.status(404).json({
+      status: "fail",
+      error: error.message
+    }); 
+  }
+});
+
+
+app.delete("/favourites", async (req, res) =>{
+  const {userid, bookid} = req.body;
+
+  try {
+    await client.query('DELETE FROM favourites WHERE userid=$1 AND bookid=$2', [userid, bookid]);
     
   } catch (error) {
     console.error(error.message)
