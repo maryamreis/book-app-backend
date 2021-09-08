@@ -105,12 +105,18 @@ app.post("/favourites", async (req, res) =>{
     //await client.query('IF NOT EXISTS(SELECT userid, bookid FROM favourites WHERE userid=$1 AND bookid=$2) BEGIN INSERT INTO favourites (userid, bookid) VALUES ($1, $2) END', [userid, bookid]);
     const selectResponce = await client.query('SELECT userid, bookid FROM favourites WHERE userid=$1 AND bookid=$2', [userid, bookid])
     console.log("responce")
-    res.json(selectResponce.rows);
+    //res.json(selectResponce.rows);
     console.log("after")
     
-    if (selectResponce.rows === []){
+    if (selectResponce.rows.length === 0){
+      console.log("inserting book to favourites list becauseit doesnt exist")
       await client.query('INSERT INTO favourites (userid, bookid) VALUES ($1, $2)', [userid, bookid]);
+      //res send response
     }
+    else {
+      console.log("skipping favourite insert because it already exists")
+    }
+    res.sendStatus(200)
 
   } catch (error) {
     console.error(error.message)
@@ -127,6 +133,7 @@ app.delete("/favourites", async (req, res) =>{
 
   try {
     await client.query('DELETE FROM favourites WHERE userid=$1 AND bookid=$2', [userid, bookid]);
+    res.sendStatus(200)
     
   } catch (error) {
     console.error(error.message)
@@ -141,7 +148,7 @@ app.delete("/favourites", async (req, res) =>{
 app.get("/favouriteBooks/:id", async (req, res) => {
   const id = parseInt(req.params.id);
   try {
-    const dbres = await client.query('SELECT b.name, b.author, b.genre FROM books AS B INNER JOIN favourites AS f ON b.id=f.bookid WHERE f.userid=$1', [id])
+    const dbres = await client.query('SELECT b.name, b.author, b.genre, b.id, f.userid FROM books AS B INNER JOIN favourites AS f ON b.id=f.bookid WHERE f.userid=$1', [id])
     res.json(dbres.rows);
   } catch (error) {
     console.error(error.message)
