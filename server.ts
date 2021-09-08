@@ -185,7 +185,10 @@ app.delete("/books/:id", async (req,res) => {
     
   } catch (error) {
     console.error(error.message)
-    
+    res.status(500).json({
+      status: "fail",
+      error: error.message
+    }); 
   };
 
 });
